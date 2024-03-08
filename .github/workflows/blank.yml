@@ -1,0 +1,60 @@
+name: Deploy Prometheus to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  prometheus:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up AWS credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}" >> $GITHUB_ENV
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region us-east-1 --name demo
+
+      - name: Install kubectl
+        run: | 
+          curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/darwin/amd64/kubectl
+
+      - name: Create ns  
+        run: | 
+          kubectl create ns prometheus
+
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod +x get_helm.sh
+          ./get_helm.sh
+
+      - name: Deploy prometheus from Helm Chart
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm install my-prometheus prometheus-community/prometheus --version 25.16.0 -n prometheus
+    
+      - name: Clone Prometheus
+        uses: GuillaumeFalourd/clone-github-repo-action@v2.3
+        with:
+          depth: 1
+          branch: 'main'
+          owner: 'DevopsAnwar'
+          repository: 'prometheus'
+    
+      - name: Access cloned repo
+        run: |
+           cd EKS_Prometheus
+           ls -la
+
+      - name: Deploy Prometheus from Helm Chart
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm upgrade my-prometheus prometheus-community/prometheus -f values.yaml -f values-dev.yaml -n prometheus    
