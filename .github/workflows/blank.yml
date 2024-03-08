@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  prometheus:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,9 +26,9 @@ jobs:
         run: | 
           curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/darwin/amd64/kubectl
 
-   #    - name: Create ns  
-   #     run: | 
-   #       kubectl create ns prometheus
+     # - name: Create ns  
+     #   run: | 
+     #     kubectl create ns prometheus
 
       - name: Install Helm
         run: |
@@ -36,11 +36,10 @@ jobs:
           chmod +x get_helm.sh
           ./get_helm.sh
 
-      - name: Deploy prometheus from Helm Chart
-        run: |
-
-           helm install my-prometheus prometheus-community/prometheus --version 25.16.0 -n prometheus
-         # helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  #    - name: Deploy prometheus from Helm Chart
+  #      run: |
+  #        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  #        helm install my-prometheus prometheus-community/prometheus --version 25.16.0 -n prometheus
     
       - name: Clone Prometheus
         uses: GuillaumeFalourd/clone-github-repo-action@v2.3
@@ -58,4 +57,4 @@ jobs:
       - name: Deploy Prometheus from Helm Chart
         run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-          helm install my-prometheus prometheus-community/prometheus -f values.yaml -f values-dev.yaml -n prometheus    
+          helm upgrade my-prometheus prometheus-community/prometheus -f values.yaml -f values-dev.yaml -n prometheus    
