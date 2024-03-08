@@ -51,7 +51,7 @@ jobs:
     
       - name: Access cloned repo
         run: |
-           cd EKS_Prometheus
+           cd prometheus
            ls -la
 
       - name: Deploy Prometheus from Helm Chart
