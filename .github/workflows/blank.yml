@@ -26,9 +26,9 @@ jobs:
         run: | 
           curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/darwin/amd64/kubectl
 
-      - name: Create ns  
-        run: | 
-          kubectl create ns prometheus
+   #    - name: Create ns  
+   #     run: | 
+   #       kubectl create ns prometheus
 
       - name: Install Helm
         run: |
